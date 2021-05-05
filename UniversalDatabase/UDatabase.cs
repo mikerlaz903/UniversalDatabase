@@ -16,6 +16,18 @@ namespace UniversalDatabase
 
         public DbResult Result { get; private set; }
 
+
+        public event EventHandler<MEventArgs> ExecutingQuery;
+        private void OnExecutingQuery(MEventArgs e)
+        {
+            ExecutingQuery?.Invoke(this, e);
+        }
+
+        public event EventHandler<MEventArgs> ExecutedQuery;
+        private void OnExecutedQuery(MEventArgs e)
+        {
+            ExecutedQuery?.Invoke(this, e);
+        }
         private UDatabase(DbConnection connection)
         {
             _connection = connection;
@@ -44,6 +56,7 @@ namespace UniversalDatabase
 
         public void GetField(string sql, IEnumerable<object> parameterCollection)
         {
+            OnExecutingQuery(null);
             try
             {
                 using var resultCommand = GetCommand(sql);
@@ -55,10 +68,12 @@ namespace UniversalDatabase
             {
                 // ignore
             }
+            OnExecutedQuery(new MEventArgs(sql, parameterCollection));
         }
 
         public void GetRow(string sql, IEnumerable<object> parameterCollection)
         {
+            OnExecutingQuery(null);
             try
             {
                 using var resultCommand = GetCommand(sql);
@@ -81,10 +96,12 @@ namespace UniversalDatabase
             {
                 // ignore
             }
+            OnExecutedQuery(new MEventArgs(sql, parameterCollection));
         }
 
         public void GetRows(string sql, IEnumerable<object> parameterCollection)
         {
+            OnExecutingQuery(null);
             try
             {
                 using var resultCommand = GetCommand(sql);
@@ -107,6 +124,7 @@ namespace UniversalDatabase
             {
                 // ignore
             }
+            OnExecutedQuery(new MEventArgs(sql, parameterCollection));
         }
     }
 }
