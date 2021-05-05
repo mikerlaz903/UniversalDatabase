@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace UniversalDatabase
 {
-    public class DbResult
+    public class DbResult : IEnumerable
     {
         private readonly List<string> _fieldNames = new List<string>();
         public object Value { get; private set; }
@@ -39,6 +40,17 @@ namespace UniversalDatabase
             }
         }
 
+        public IEnumerator GetEnumerator()
+        {
+            if (Value == null) throw new NotImplementedException();
+            return Value switch
+            {
+                List<object> list => list.GetEnumerator(),
+                List<List<object>> matrix => matrix.GetEnumerator(),
+                _ => throw new InvalidOperationException()
+            };
+        }
+
         public DbResult(object result, DataTable info)
         {
             _fieldNames = new List<string>();
@@ -58,6 +70,17 @@ namespace UniversalDatabase
             }
         }
 
+        public int IndexOfColumn(string columnName)
+        {
+            return _fieldNames.IndexOf(columnName);
+        }
+
+        public int GetRowIndex(Func<List<object>, bool> predicate)
+        {
+            var rowSelection = ((List<List<object>>)Value).FirstOrDefault(predicate);
+            var indexRowSelection = ((List<List<object>>)Value).FindIndex(row => row == rowSelection);
+            return indexRowSelection;
+        }
         public void Clear()
         {
             Value = null;
