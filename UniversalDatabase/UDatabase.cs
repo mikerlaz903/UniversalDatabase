@@ -11,8 +11,8 @@ namespace UniversalDatabase
         private static UDatabase _instance;
         private static readonly object SyncRoot = new ();
 
-        private static DbConnection _connection;
-        private static DbTransaction _transaction;
+        private DbConnection _connection;
+        private DbTransaction _transaction;
 
         public DbResult Result { get; private set; }
 
@@ -45,7 +45,10 @@ namespace UniversalDatabase
             return _instance;
         }
 
-        private static DbCommand GetCommand(string inputCommand)
+        public void Commit() => _transaction.Commit();
+        public void Rollback() => _transaction.Rollback();
+
+        private DbCommand GetCommand(string inputCommand)
         {
             var command = _connection.CreateCommand();
             command.Transaction = _transaction;
@@ -120,11 +123,32 @@ namespace UniversalDatabase
 
                 Result = new (rows, executedSqlInfo);
             }
-            catch (DbException)
+            catch (Exception exc) when (exc.GetType() == typeof(DbException))
             {
                 // ignore
             }
             OnExecutedQuery(new MEventArgs(sql, parameterCollection));
+        }
+
+        public int ExecuteNonQuery(string sql, IEnumerable<object> parameterCollection, bool autoCommit = true)
+        {
+            OnExecutingQuery(null);
+            int rowEffected = 0;
+            var collection = parameterCollection.ToList();
+            try
+            {
+                var command = GetCommand(sql);
+                command.Parameters.AddRange(collection.ToArray());
+                rowEffected = command.ExecuteNonQuery();
+                if (autoCommit)
+                    command.Transaction?.Commit();
+            }
+            catch (Exception exc) when (exc.GetType() == typeof(DbException))
+            {
+                // ignore
+            }
+            OnExecutedQuery(new MEventArgs(sql, parameterCollection));
+            return rowEffected;
         }
     }
 }
