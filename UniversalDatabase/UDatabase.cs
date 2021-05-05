@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace UniversalDatabase
 {
@@ -57,6 +58,11 @@ namespace UniversalDatabase
             return command;
         }
 
+        /// <summary>
+        /// Метод получается первое поле первой строки выполненного запроса
+        /// </summary>
+        /// <param name="sql">Запрос для получения данных/></param>
+        /// <param name="parameterCollection">Параметры запроса</param>
         public void GetField(string sql, IEnumerable<object> parameterCollection)
         {
             OnExecutingQuery(null);
@@ -74,6 +80,22 @@ namespace UniversalDatabase
             OnExecutedQuery(new MEventArgs(sql, parameterCollection));
         }
 
+        /// <summary>
+        /// Ассинхронный аналог <see cref="GetField"/>
+        /// </summary>
+        /// <param name="sql">Запрос для получение данных</param>
+        /// <param name="parameterCollection">Параметры запроса</param>
+        public Task GetFieldAsync(string sql, IEnumerable<object> parameterCollection)
+        {
+            return Task.Factory.StartNew(() => GetField(sql, parameterCollection));
+        }
+
+
+        /// <summary>
+        /// Метод получается одну строку выполненного запроса
+        /// </summary>
+        /// <param name="sql">Запрос для получения данных/></param>
+        /// <param name="parameterCollection">Параметры запроса</param>
         public void GetRow(string sql, IEnumerable<object> parameterCollection)
         {
             OnExecutingQuery(null);
@@ -101,7 +123,20 @@ namespace UniversalDatabase
             }
             OnExecutedQuery(new MEventArgs(sql, parameterCollection));
         }
-
+        /// <summary>
+        /// Ассинхронный аналог <see cref="GetRow"/>
+        /// </summary>
+        /// <param name="sql">Запрос для получение данных</param>
+        /// <param name="parameterCollection">Параметры запроса</param>
+        public Task GetRowAsync(string sql, IEnumerable<object> parameterCollection)
+        {
+            return Task.Factory.StartNew(() => GetRow(sql, parameterCollection));
+        }
+        /// <summary>
+        /// Метод получается все строки выполненного запроса
+        /// </summary>
+        /// <param name="sql">Запрос для получение данных/></param>
+        /// <param name="parameterCollection">Параметры запроса</param>
         public void GetRows(string sql, IEnumerable<object> parameterCollection)
         {
             OnExecutingQuery(null);
@@ -129,7 +164,23 @@ namespace UniversalDatabase
             }
             OnExecutedQuery(new MEventArgs(sql, parameterCollection));
         }
-
+        /// <summary>
+        /// Ассинхронный аналог <see cref="GetRows"/>
+        /// </summary>
+        /// <param name="sql">Запрос для получение данных</param>
+        /// <param name="parameterCollection">Параметры запроса</param>
+        /// <returns></returns>
+        public Task GetRowsAsync(string sql, IEnumerable<object> parameterCollection)
+        {
+            return Task.Factory.StartNew(() => GetRows(sql, parameterCollection));
+        }
+        /// <summary>
+        /// Метод выполняет запрос на изменение данных 
+        /// </summary>
+        /// <param name="sql">Запрос для получение данных/></param>
+        /// <param name="parameterCollection">Параметры запроса</param>
+        /// <param name="autoCommit">Автоматическое выполнение коммита после выполнения запроса</param>
+        /// <returns>Количество измененных строчек</returns>
         public int ExecuteNonQuery(string sql, IEnumerable<object> parameterCollection, bool autoCommit = true)
         {
             OnExecutingQuery(null);
