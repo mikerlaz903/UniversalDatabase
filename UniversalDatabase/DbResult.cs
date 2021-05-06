@@ -10,7 +10,10 @@ namespace UniversalDatabase
 {
     public class DbResult : IEnumerable
     {
+        private readonly UOptions _options;
         private readonly List<string> _fieldNames = new List<string>();
+
+
         public object Value { get; private set; }
         public DataTable ExecutedSqlInfo { get; }
 
@@ -31,9 +34,14 @@ namespace UniversalDatabase
         {
             get
             {
+                StringComparison comp = StringComparison.Ordinal;
+                if ((_options & UOptions.IgnoreCare) == UOptions.IgnoreCare)
+                    comp = StringComparison.OrdinalIgnoreCase;
+
                 return Value switch
                 {
-                    List<List<object>> matrix => (from row in matrix select row[_fieldNames.FindIndex(match => match.Equals(colName))]).ToList(),
+                    List<object> list => list[_fieldNames.FindIndex(row => row.Equals(colName, comp))],
+                    List<List<object>> matrix => (from row in matrix select row[_fieldNames.FindIndex(match => match.Equals(colName, comp))]).ToList(),
                     _ => throw new InvalidOperationException("Indexer can be applied only after IEnumerable result")
                 };
             }
@@ -44,17 +52,18 @@ namespace UniversalDatabase
             if (Value == null) throw new NotImplementedException();
             return Value switch
             {
+                List<object> list => list.GetEnumerator(),
                 List<List<object>> matrix => matrix.GetEnumerator(),
                 _ => throw new InvalidOperationException()
             };
         }
 
-        public DbResult(object result, DataTable info)
+        public DbResult(object result, DataTable info, UOptions options)
         {
-            _fieldNames = new List<string>();
-
             Value = result;
             ExecutedSqlInfo = info;
+
+            _options = options;
 
             DefineFieldNames();
         }

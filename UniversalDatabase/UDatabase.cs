@@ -15,6 +15,8 @@ namespace UniversalDatabase
         private DbConnection _connection;
         private DbTransaction _transaction;
 
+        public UOptions Options { get; set; }
+
         public DbResult Result { get; private set; }
 
 
@@ -71,7 +73,7 @@ namespace UniversalDatabase
                 using var resultCommand = GetCommand(sql);
                 resultCommand.Parameters.AddRange(parameterCollection.ToArray());
                 object res = resultCommand.ExecuteScalar();
-                Result = new (res, null);
+                Result = new (res, null, Options);
             }
             catch (Exception exc) when (exc.GetType() == typeof(DbException))
             {
@@ -115,7 +117,7 @@ namespace UniversalDatabase
                 var executedSqlInfo = reader.GetSchemaTable();
                 reader.Close();
 
-                Result = new (fields, executedSqlInfo);
+                Result = new (fields, executedSqlInfo, Options);
             }
             catch (Exception exc) when (exc.GetType() == typeof(DbException))
             {
@@ -156,7 +158,7 @@ namespace UniversalDatabase
                 var executedSqlInfo = reader.GetSchemaTable();
                 reader.Close();
 
-                Result = new (rows, executedSqlInfo);
+                Result = new (rows, executedSqlInfo, Options);
             }
             catch (Exception exc) when (exc.GetType() == typeof(DbException))
             {
