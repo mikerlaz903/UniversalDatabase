@@ -9,6 +9,6 @@ namespace UniversalDatabase
     [Flags]
     public enum UOptions
     {
-        IgnoreCare = 0
+        IgnoreCare = 1
     }
 }
