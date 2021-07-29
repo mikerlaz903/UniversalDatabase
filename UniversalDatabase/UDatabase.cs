@@ -89,7 +89,7 @@ namespace UniversalDatabase
         /// <param name="parameterCollection">Параметры запроса</param>
         public Task GetFieldAsync(string sql, IEnumerable<object> parameterCollection)
         {
-            return Task.Factory.StartNew(() => GetField(sql, parameterCollection));
+            return Task.Run(() => GetField(sql, parameterCollection));
         }
 
 
@@ -132,7 +132,7 @@ namespace UniversalDatabase
         /// <param name="parameterCollection">Параметры запроса</param>
         public Task GetRowAsync(string sql, IEnumerable<object> parameterCollection)
         {
-            return Task.Factory.StartNew(() => GetRow(sql, parameterCollection));
+            return Task.Run(() => GetRow(sql, parameterCollection));
         }
         /// <summary>
         /// Метод получается все строки выполненного запроса
@@ -174,7 +174,7 @@ namespace UniversalDatabase
         /// <returns></returns>
         public Task GetRowsAsync(string sql, IEnumerable<object> parameterCollection)
         {
-            return Task.Factory.StartNew(() => GetRows(sql, parameterCollection));
+            return Task.Run(() => GetRows(sql, parameterCollection));
         }
         /// <summary>
         /// Метод выполняет запрос на изменение данных 

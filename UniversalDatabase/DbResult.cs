@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UniversalDatabase.Exceptions;
 
 namespace UniversalDatabase
 {
@@ -39,6 +40,11 @@ namespace UniversalDatabase
                 StringComparison comp = StringComparison.Ordinal;
                 if ((_options & UOptions.IgnoreCare) == UOptions.IgnoreCare)
                     comp = StringComparison.OrdinalIgnoreCase;
+
+                if (Value is List<object> { Count: 0 } || Value is List<List<object>> { Count: 0 })
+                    throw new IndexOutOfRangeException("Enumerable have no elements");
+                if (_fieldNames.FindIndex(row => row.Equals(colName, comp)) == -1)
+                    throw new ColumnNotExistsException("The column does not appear in the executed query");
 
                 return Value switch
                 {
